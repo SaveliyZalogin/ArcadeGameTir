@@ -33,7 +33,7 @@ class Crosshair():
 
     def draw(self, color=arcade.color.WHITE):
         arcade.draw_texture_rectangle(self.x, self.y, 50, 50, crossHairTexture)
-        #arcade.draw_circle_filled(self.x, self.y, self.r, color
+        #arcade.draw_circle_filled(self.x, self.y, self.r, colo
 
     # def move(self, x, y):
     #   self.x += x
