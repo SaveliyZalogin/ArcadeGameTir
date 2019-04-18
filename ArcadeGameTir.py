@@ -6,8 +6,6 @@ SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 600
 
 background = arcade.load_texture("img/364.jpg")
-heroTexture = arcade.load_texture("img/pushka.png")
-heroTexture = arcade.load_texture("img/pushka2.png")
 heroTexture = arcade.load_texture("img/pushka2.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 enemiesTexture = arcade.load_texture("img/ter.png")
