@@ -49,16 +49,18 @@ class Bullet:
         self.dy = dy * self.speed
         self.color = [10, 10, 10]
         self.distance_live = distance_live
+        self.hero = Hero()
+        self.crosshair = Crosshair()
 
     def draw(self):
-        arcade.draw_line(self.x, self.y,
+        arcade.draw_line(self.crosshair.x, self.crosshair.y,
                          self.x + self.dx * 5,
                          self.y + self.dy * 5,
                          self.color, 4)
 
     def move(self):
-        self.x += self.dx * self.speed
-        self.y += self.dy * self.speed
+        self.crosshair.x += self.dx * self.speed
+        self.crosshair.y += self.dy * self.speed
         self.distance_live -= (self.dy * self.speed ** 2 + self.dx * self.speed ** 2) ** 0.5
 
     def is_removeble(self):
@@ -82,10 +84,7 @@ class Hero():
 
     def draw(self):
         arcade.draw_texture_rectangle(self.x, self.y, 900, 450, heroTexture)
-        #x1, y1, = self.x, self.y
-        #x2 = x1 + self.r * 1.3 * self.dx
-        #y2 = y1 + self.r * 1.3 * self.dy
-        #arcade.draw_line(x1, y1, x2, y2, arcade.color.BLACK
+
 
 
     def turn_left(self):
