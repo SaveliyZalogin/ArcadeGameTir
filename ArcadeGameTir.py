@@ -6,7 +6,7 @@ SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 600
 
 background = arcade.load_texture("img/364.jpg")
-heroTexture = arcade.load_texture("img/5.gif")
+heroTexture = arcade.load_texture("img/pushka2.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 # enemiesTexture = arcade.load_texture("")
 
@@ -23,11 +23,9 @@ class Enemies():
     def draw(self):
         pass
 
-
-
 class Crosshair():
     def __init__(self):
-        self.x = 450
+        self.x = 420
         self.y = 300
         self.r = 5
 
@@ -40,27 +38,27 @@ class Crosshair():
     #  self.y += y
 
 
-class Bullet:
-    def __init__(self, x, y, dx, dy, distance_live=100):
+class Bullet():
+    def __init__(self, x, y, dx, dy, distance_live=1000):
         self.x = x
         self.y = y
         self.speed = 3
-        self.dx = dx * self.speed
-        self.dy = dy * self.speed
+        self.dx = dx
+        self.dy = dy
         self.color = [10, 10, 10]
         self.distance_live = distance_live
-        self.hero = Hero()
-        self.crosshair = Crosshair()
+
+        # self.crosshair = Crosshair()
 
     def draw(self):
-        arcade.draw_line(self.crosshair.x, self.crosshair.y,
+        arcade.draw_line(self.x, self.y,
                          self.x + self.dx * 5,
                          self.y + self.dy * 5,
                          self.color, 4)
 
     def move(self):
-        self.crosshair.x += self.dx * self.speed
-        self.crosshair.y += self.dy * self.speed
+        self.x += self.dx * self.speed
+        self.y += self.dy * self.speed
         self.distance_live -= (self.dy * self.speed ** 2 + self.dx * self.speed ** 2) ** 0.5
 
     def is_removeble(self):
@@ -74,8 +72,8 @@ class Bullet:
 
 class Hero():
     def __init__(self, color=arcade.color.RED, size=30):
-        self.x = 430
-        self.y = 220
+        self.x = 470
+        self.y = 110
         self.dir = 0
         self.r = size
         self.dx = sin(self.dir * pi / 180)
@@ -83,15 +81,20 @@ class Hero():
         self.color = color
 
     def draw(self):
-        arcade.draw_texture_rectangle(self.x, self.y, 900, 450, heroTexture)
-
-
+        arcade.draw_texture_rectangle(self.x, self.y, 450, 220, heroTexture)
 
     def turn_left(self):
         self.x -= 20
 
     def turn_right(self):
         self.x += 20
+
+    def set_dir(self, cross):
+        dx = cross.x - self.x
+        dy = cross.y - self.y
+        r = (dx ** 2 + dy ** 2) ** 0.5
+        self.dx = dx / r
+        self.dy = dy / r
 
 
 class MyGame(arcade.Window):
@@ -102,8 +105,9 @@ class MyGame(arcade.Window):
 
     def setup(self):
         self.hero = Hero()
-        self.bullet_list = []
         self.crosshair = Crosshair()
+        self.bullet_list = []
+        # self.bullet = Bullet
 
     def on_draw(self):
         arcade.start_render()
@@ -121,7 +125,8 @@ class MyGame(arcade.Window):
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.LEFT:
-            self.hero.turn_left()
+            pass
+            # self.hero.turn_left()
         #elif key == arcade.key.RIGHT:
         #   self.hero.turn_right()
         #elif key == arcade.key.SPACE:
@@ -129,13 +134,17 @@ class MyGame(arcade.Window):
     def on_mouse_motion(self, x, y, dx, dy):
         self.crosshair.x = x
         self.crosshair.y = y
-        self.hero.x = x
+        self.hero.x = x + 90
+        # self.bullet.x = x
+        # self.bullet.y = y
 
     def on_mouse_press(self, x: float, y: float, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
-            self.bullet_list.append(Bullet(self.hero.x + self.hero.dx * self.hero.r,
-                                               self.hero.y + self.hero.dy * self.hero.r,
-                                               self.hero.dx, self.hero.dy))
+            self.hero.set_dir(self.crosshair)
+            self.bullet_list.append(Bullet(self.crosshair.x + 60,
+                                            self.hero.y + 25,
+                                            self.hero.dx,
+                                            self.hero.dy))
 
 
 def main():
