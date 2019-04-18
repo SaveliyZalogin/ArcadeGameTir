@@ -8,6 +8,7 @@ SCREEN_HEIGHT = 600
 background = arcade.load_texture("img/364.jpg")
 heroTexture = arcade.load_texture("img/pushka.png")
 heroTexture = arcade.load_texture("img/pushka2.png")
+heroTexture = arcade.load_texture("img/pushka2.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 enemiesTexture = arcade.load_texture("img/ter.png")
 
@@ -30,6 +31,8 @@ class Enemies():
 
         if self.x == 560:
             arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
+
+
 class Crosshair():
     def __init__(self):
         self.x = 420
@@ -110,6 +113,7 @@ class MyGame(arcade.Window):
 
     def setup(self):
         self.hero = Hero()
+        self.bullet_list = []
         self.crosshair = Crosshair()
         self.bullet_list = []
         # self.bullet = Bullet
