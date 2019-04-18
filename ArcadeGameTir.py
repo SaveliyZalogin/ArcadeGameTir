@@ -6,9 +6,9 @@ SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 600
 
 background = arcade.load_texture("img/364.jpg")
-heroTexture = arcade.load_texture("img/5.gif")
+heroTexture = arcade.load_texture("img/pushka.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
-# enemiesTexture = arcade.load_texture("")
+enemiesTexture = arcade.load_texture("img/ter.png")
 
 
 def get_distance(hero1, hero2):
@@ -17,14 +17,18 @@ def get_distance(hero1, hero2):
 
 class Enemies():
     def __init__(self):
-        self.x = random.randint(0, 900)
-        self.y = random.randint(0, 600)
+        list_position = [(200, 155), (70, 463), (560, 230)]
+        self.x, self.y = random.choice(list_position)
 
     def draw(self):
-        pass
+        if self.x == 200:
+            arcade.draw_texture_rectangle(self.x, self.y, 90, 150, enemiesTexture)
 
+        if self.x == 70:
+            arcade.draw_texture_rectangle(self.x, self.y, 50, 110, enemiesTexture)
 
-
+        if self.x == 560:
+            arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
 class Crosshair():
     def __init__(self):
         self.x = 450
@@ -72,8 +76,8 @@ class Bullet:
 
 class Hero():
     def __init__(self, color=arcade.color.RED, size=30):
-        self.x = 430
-        self.y = 220
+        self.x = 200
+        self.y = 63
         self.dir = 0
         self.r = size
         self.dx = sin(self.dir * pi / 180)
@@ -81,7 +85,7 @@ class Hero():
         self.color = color
 
     def draw(self):
-        arcade.draw_texture_rectangle(self.x, self.y, 900, 450, heroTexture)
+        arcade.draw_texture_rectangle(self.x, self.y, 350, 250, heroTexture)
         #x1, y1, = self.x, self.y
         #x2 = x1 + self.r * 1.3 * self.dx
         #y2 = y1 + self.r * 1.3 * self.dy
@@ -105,16 +109,22 @@ class MyGame(arcade.Window):
         self.hero = Hero()
         self.bullet_list = []
         self.crosshair = Crosshair()
+        self.enemi_list = []
 
     def on_draw(self):
         arcade.start_render()
         arcade.draw_texture_rectangle(450, 300, 900, 600, background)
+        for enemy in self.enemi_list:
+            enemy.draw()
         self.hero.draw()
         self.crosshair.draw()
         for bullet in self.bullet_list:
             bullet.draw()
 
     def update(self, delta_time):
+        if random.randint(0, 1400) < 10:
+            self.enemi_list.append(Enemies())
+
         for bullet in self.bullet_list:
             bullet.move()
             if bullet.is_removeble():
@@ -123,10 +133,7 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         if key == arcade.key.LEFT:
             self.hero.turn_left()
-        #elif key == arcade.key.RIGHT:
-        #   self.hero.turn_right()
-        #elif key == arcade.key.SPACE:
-        #
+
     def on_mouse_motion(self, x, y, dx, dy):
         self.crosshair.x = x
         self.crosshair.y = y
