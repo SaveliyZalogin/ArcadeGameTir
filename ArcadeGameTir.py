@@ -22,7 +22,7 @@ class Enemies():
 
     def draw(self):
         if self.x == 200:
-            arcade.draw_texture_rectangle(self.x, self.y, 90, 150, enemiesTexture)
+            arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
 
         if self.x == 70:
             arcade.draw_texture_rectangle(self.x, self.y, 50, 110, enemiesTexture)
