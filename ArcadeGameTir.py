@@ -23,10 +23,8 @@ class Enemies():
     def draw(self):
         if self.x == 200:
             arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
-
         if self.x == 70:
             arcade.draw_texture_rectangle(self.x, self.y, 50, 110, enemiesTexture)
-
         if self.x == 560:
             arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
 
@@ -50,7 +48,7 @@ class Bullet():
     def __init__(self, x, y, dx, dy, distance_live=1000):
         self.x = x
         self.y = y
-        self.speed = 3
+        self.speed = 12
         self.dx = dx
         self.dy = dy
         self.color = [10, 10, 10]
@@ -73,7 +71,7 @@ class Bullet():
         return out_x or out_y or self.distance_live <= 0
 
     def is_hit(self, hero):
-        return get_distance(self, hero) <= hero.r
+        return get_distance(self, hero) <= hero.x
 
 
 class Hero():
@@ -114,7 +112,6 @@ class MyGame(arcade.Window):
         self.bullet_list = []
         self.crosshair = Crosshair()
         self.bullet_list = []
-        # self.bullet = Bullet
         self.enemi_list = []
 
     def on_draw(self):
@@ -130,11 +127,14 @@ class MyGame(arcade.Window):
     def update(self, delta_time):
         if random.randint(0, 1400) < 10:
             self.enemi_list.append(Enemies())
-
         for bullet in self.bullet_list:
             bullet.move()
             if bullet.is_removeble():
                 self.bullet_list.remove(bullet)
+            for enemy in self.enemi_list:
+                if bullet.is_hit(enemy):
+                    self.bullet_list.remove(bullet)
+                    self.enemi_list.remove(enemy)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.LEFT:
