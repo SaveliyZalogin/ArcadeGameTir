@@ -1,6 +1,7 @@
 import arcade
 from math import sin, cos, pi
 import random
+import time
 
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 600
@@ -9,7 +10,7 @@ background = arcade.load_texture("img/364.jpg")
 heroTexture = arcade.load_texture("img/pushka2.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 enemiesTexture = arcade.load_texture("img/ter.png")
-
+bulletTexture = arcade.load_texture("img/bullet.png")
 
 def get_distance(hero1, hero2):
     return ((hero1.x - hero2.x) ** 2 + (hero1.y - hero2.y) ** 2) ** 0.5
@@ -45,20 +46,17 @@ class Crosshair():
 
 
 class Bullet():
-    def __init__(self, x, y, dx, dy, distance_live=1000):
+    def __init__(self, x, y, dx, dy):
         self.x = x
         self.y = y
         self.speed = 12
         self.dx = dx
         self.dy = dy
         self.color = [10, 10, 10]
-        self.distance_live = distance_live
+        self.distance_live = 1000
 
     def draw(self):
-        arcade.draw_line(self.x, self.y,
-                         self.x + self.dx * 5,
-                         self.y + self.dy * 5,
-                         self.color, 4)
+        arcade.draw_texture_rectangle(self.x, self.y, 10, 10, bulletTexture)
 
     def move(self):
         self.x += self.dx * self.speed
@@ -68,7 +66,7 @@ class Bullet():
     def is_removeble(self):
         out_x = not 0 < self.x < SCREEN_WIDTH
         out_y = not 0 < self.y < SCREEN_HEIGHT
-        return out_x or out_y or self.distance_live <= 0
+        return out_x or out_y or self.distance_live == 0
 
     def is_hit(self, hero):
         return get_distance(self, hero) <= hero.x
@@ -113,6 +111,9 @@ class MyGame(arcade.Window):
         self.crosshair = Crosshair()
         self.bullet_list = []
         self.enemi_list = []
+        self.wait = time.clock()
+        self.bulletsCount = 30
+        self.reloadBuleetsCount = 90
 
     def on_draw(self):
         arcade.start_render()
@@ -121,6 +122,7 @@ class MyGame(arcade.Window):
             enemy.draw()
         self.hero.draw()
         self.crosshair.draw()
+        arcade.draw_text(self.get_bullets(), 100, 100, arcade.color.WHITE)
         for bullet in self.bullet_list:
             bullet.draw()
 
@@ -131,10 +133,16 @@ class MyGame(arcade.Window):
             bullet.move()
             if bullet.is_removeble():
                 self.bullet_list.remove(bullet)
+                self.wait = 0
             for enemy in self.enemi_list:
                 if bullet.is_hit(enemy):
                     self.bullet_list.remove(bullet)
                     self.enemi_list.remove(enemy)
+
+    def get_bullets(self):
+        text = "{}\n".format(self.bulletsCount) + \
+               "{}".format(self.reloadBuleetsCount)
+        return text
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.LEFT:
@@ -152,13 +160,19 @@ class MyGame(arcade.Window):
         # self.bullet.y = y
 
     def on_mouse_press(self, x: float, y: float, button, modifiers):
-        if button == arcade.MOUSE_BUTTON_LEFT:
-            self.hero.set_dir(self.crosshair)
-            self.bullet_list.append(Bullet(self.crosshair.x + 60,
-                                            self.hero.y + 25,
-                                            self.hero.dx,
-                                            self.hero.dy))
-
+        if len(self.bullet_list) <= 0:
+            if button == arcade.MOUSE_BUTTON_LEFT:
+                if self.bulletsCount > 0:
+                    self.hero.set_dir(self.crosshair)
+                    self.bullet_list.append(Bullet(self.crosshair.x + 60,
+                                                    self.hero.y + 25,
+                                                    self.hero.dx,
+                                                    self.hero.dy))
+                    self.bulletsCount -= len(self.bullet_list)
+        if button == arcade.MOUSE_BUTTON_RIGHT:
+            if self.reloadBuleetsCount > 0:
+                self.reloadBuleetsCount -= 30 - self.bulletsCount
+                self.bulletsCount = 30
 
 def main():
     game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT)
