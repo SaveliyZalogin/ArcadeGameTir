@@ -148,7 +148,7 @@ class MyGame(arcade.Window):
                 if bullet.is_hit(enemy):
                     self.bullet_list.remove(bullet)
                     self.enemi_list.remove(enemy)
-                    Enemies().here -= 1
+                    # Enemies().here -= 1
     def get_bullets(self):
         text = "{}\n".format(self.bulletsCount) + \
                "{}".format(self.reloadBuleetsCount)
