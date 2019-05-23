@@ -5,6 +5,7 @@ import time
 
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 600
+BULLET_KD = 30
 
 background = arcade.load_texture("img/364.jpg")
 heroTexture = arcade.load_texture("img/pushka2.png")
@@ -18,17 +19,21 @@ def get_distance(hero1, hero2):
 
 class Enemies():
     def __init__(self):
-        list_position = [(200, 155), (70, 463), (560, 230)]
-        self.x, self.y = random.choice(list_position)
+        self.here = 0
+        if self.here == 0:
+            list_position = [(200, 155), (70, 463), (560, 230)]
+            self.x, self.y = random.choice(list_position)
 
     def draw(self):
         if self.x == 200:
             arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
+            self.here = 1
         if self.x == 70:
             arcade.draw_texture_rectangle(self.x, self.y, 50, 110, enemiesTexture)
+            self.here = 2
         if self.x == 560:
             arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
-
+            self.here = 3
 
 class Crosshair():
     def __init__(self):
@@ -53,7 +58,7 @@ class Bullet():
         self.dx = dx
         self.dy = dy
         self.color = [10, 10, 10]
-        self.distance_live = 1000
+        self.distance_live = 30
 
     def draw(self):
         arcade.draw_texture_rectangle(self.x, self.y, 10, 10, bulletTexture)
@@ -61,12 +66,12 @@ class Bullet():
     def move(self):
         self.x += self.dx * self.speed
         self.y += self.dy * self.speed
-        self.distance_live -= (self.dy * self.speed ** 2 + self.dx * self.speed ** 2) ** 0.5
+        self.distance_live -= 1
 
     def is_removeble(self):
         out_x = not 0 < self.x < SCREEN_WIDTH
         out_y = not 0 < self.y < SCREEN_HEIGHT
-        return out_x or out_y or self.distance_live == 0
+        return out_x or out_y or self.distance_live <= 0
 
     def is_hit(self, hero):
         return get_distance(self, hero) <= hero.x
@@ -81,6 +86,10 @@ class Hero():
         self.dx = sin(self.dir * pi / 180)
         self.dy = cos(self.dir * pi / 180)
         self.color = color
+        self.bullet_kd = BULLET_KD
+
+    def update(self):
+        self.bullet_kd -= 1
 
     def draw(self):
         arcade.draw_texture_rectangle(self.x, self.y, 450, 220, heroTexture)
@@ -127,6 +136,7 @@ class MyGame(arcade.Window):
             bullet.draw()
 
     def update(self, delta_time):
+        self.hero.update()
         if random.randint(0, 1400) < 10:
             self.enemi_list.append(Enemies())
         for bullet in self.bullet_list:
@@ -138,7 +148,7 @@ class MyGame(arcade.Window):
                 if bullet.is_hit(enemy):
                     self.bullet_list.remove(bullet)
                     self.enemi_list.remove(enemy)
-
+                    Enemies().here -= 1
     def get_bullets(self):
         text = "{}\n".format(self.bulletsCount) + \
                "{}".format(self.reloadBuleetsCount)
@@ -160,15 +170,16 @@ class MyGame(arcade.Window):
         # self.bullet.y = y
 
     def on_mouse_press(self, x: float, y: float, button, modifiers):
-        if len(self.bullet_list) <= 0:
-            if button == arcade.MOUSE_BUTTON_LEFT:
-                if self.bulletsCount > 0:
-                    self.hero.set_dir(self.crosshair)
-                    self.bullet_list.append(Bullet(self.crosshair.x + 60,
-                                                    self.hero.y + 25,
-                                                    self.hero.dx,
-                                                    self.hero.dy))
-                    self.bulletsCount -= len(self.bullet_list)
+        # if len(self.bullet_list) <= 0:
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            if self.bulletsCount > 0 and self.hero.bullet_kd <= 0:
+                self.hero.bullet_kd = BULLET_KD
+                self.hero.set_dir(self.crosshair)
+                self.bullet_list.append(Bullet(self.crosshair.x + 60,
+                                               self.hero.y + 25,
+                                               self.hero.dx,
+                                               self.hero.dy))
+                self.bulletsCount -= len(self.bullet_list)
         if button == arcade.MOUSE_BUTTON_RIGHT:
             if self.reloadBuleetsCount > 0:
                 self.reloadBuleetsCount -= 30 - self.bulletsCount
