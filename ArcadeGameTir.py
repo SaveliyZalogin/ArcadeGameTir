@@ -1,4 +1,5 @@
 import arcade
+from arcade import Texture
 from math import sin, cos, pi
 import random
 import time
@@ -8,9 +9,11 @@ SCREEN_HEIGHT = 600
 
 background = arcade.load_texture("img/364.jpg")
 heroTexture = arcade.load_texture("img/pushka2.png")
+gunTexture1 = arcade.load_texture("img/puska3.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 enemiesTexture = arcade.load_texture("img/ter.png")
 bulletTexture = arcade.load_texture("img/bullet.png")
+
 
 def get_distance(hero1, hero2):
     return ((hero1.x - hero2.x) ** 2 + (hero1.y - hero2.y) ** 2) ** 0.5
@@ -21,13 +24,14 @@ class Enemies():
         list_position = [(200, 155), (70, 463), (560, 230)]
         self.x, self.y = random.choice(list_position)
 
+
     def draw(self):
         if self.x == 200:
             arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
         if self.x == 70:
             arcade.draw_texture_rectangle(self.x, self.y, 50, 110, enemiesTexture)
         if self.x == 560:
-            arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
+            arcade.draw_texture_rectangle(self.x, self.y, 60, 120, enemiesTexture)
 
 
 class Crosshair():
@@ -81,9 +85,10 @@ class Hero():
         self.dx = sin(self.dir * pi / 180)
         self.dy = cos(self.dir * pi / 180)
         self.color = color
+        self.gun = heroTexture
 
     def draw(self):
-        arcade.draw_texture_rectangle(self.x, self.y, 450, 220, heroTexture)
+        arcade.draw_texture_rectangle(self.x, self.y, 450, 220, self.gun)
 
     def turn_left(self):
         self.x -= 20
@@ -111,23 +116,27 @@ class MyGame(arcade.Window):
         self.crosshair = Crosshair()
         self.bullet_list = []
         self.enemi_list = []
+        self.hp_list = []
         self.wait = time.clock()
         self.bulletsCount = 30
         self.reloadBuleetsCount = 90
+        self.killcount = 0
 
     def on_draw(self):
         arcade.start_render()
         arcade.draw_texture_rectangle(450, 300, 900, 600, background)
+
         for enemy in self.enemi_list:
             enemy.draw()
         self.hero.draw()
         self.crosshair.draw()
+        arcade.draw_text(self.kill_count(), 150, 100, arcade.color.WHITE)
         arcade.draw_text(self.get_bullets(), 100, 100, arcade.color.WHITE)
         for bullet in self.bullet_list:
             bullet.draw()
 
     def update(self, delta_time):
-        if random.randint(0, 1400) < 10:
+        if random.randint(0, 1200) < 10:
             self.enemi_list.append(Enemies())
         for bullet in self.bullet_list:
             bullet.move()
@@ -138,6 +147,12 @@ class MyGame(arcade.Window):
                 if bullet.is_hit(enemy):
                     self.bullet_list.remove(bullet)
                     self.enemi_list.remove(enemy)
+                    self.killcount += 1
+
+
+    def kill_count(self):
+        killtext = "{}\n".format(self.killcount)
+        return killtext
 
     def get_bullets(self):
         text = "{}\n".format(self.bulletsCount) + \
@@ -145,13 +160,11 @@ class MyGame(arcade.Window):
         return text
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.LEFT:
-            pass
-            # self.hero.turn_left()
-        #elif key == arcade.key.RIGHT:
-        #   self.hero.turn_right()
-        #elif key == arcade.key.SPACE:
-        #
+        if key == arcade.key.E:
+            self.gun = gunTexture1
+
+
+
     def on_mouse_motion(self, x, y, dx, dy):
         self.crosshair.x = x
         self.crosshair.y = y
