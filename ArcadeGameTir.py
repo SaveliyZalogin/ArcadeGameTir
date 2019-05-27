@@ -56,7 +56,7 @@ class Bullet():
         self.dx = dx
         self.dy = dy
         self.color = [10, 10, 10]
-        self.distance_live = 1000
+        self.distance_live = 25
 
     def draw(self):
         arcade.draw_texture_rectangle(self.x, self.y, 10, 10, bulletTexture)
@@ -64,12 +64,12 @@ class Bullet():
     def move(self):
         self.x += self.dx * self.speed
         self.y += self.dy * self.speed
-        self.distance_live -= (self.dy * self.speed ** 2 + self.dx * self.speed ** 2) ** 0.5
+        self.distance_live -= 1
 
     def is_removeble(self):
         out_x = not 0 < self.x < SCREEN_WIDTH
         out_y = not 0 < self.y < SCREEN_HEIGHT
-        return out_x or out_y or self.distance_live == 0
+        return out_x or out_y or self.distance_live <= 0
 
     def is_hit(self, hero):
         return get_distance(self, hero) <= hero.x
@@ -84,6 +84,7 @@ class Hero():
         self.dx = sin(self.dir * pi / 180)
         self.dy = cos(self.dir * pi / 180)
         self.color = color
+        self.KD = 45
 
 
     def draw(self):
@@ -137,11 +138,12 @@ class MyGame(arcade.Window):
     def update(self, delta_time):
         if random.randint(0, 1200) < 10:
             self.enemi_list.append(Enemies())
+        self.hero.KD -= 1
         for bullet in self.bullet_list:
             bullet.move()
+
             if bullet.is_removeble():
                 self.bullet_list.remove(bullet)
-                self.wait = 0
             for enemy in self.enemi_list:
                 if bullet.is_hit(enemy):
                     self.bullet_list.remove(bullet)
@@ -170,15 +172,16 @@ class MyGame(arcade.Window):
         # self.bullet.y = y
 
     def on_mouse_press(self, x: float, y: float, button, modifiers):
-        if len(self.bullet_list) <= 0:
-            if button == arcade.MOUSE_BUTTON_LEFT:
-                if self.bulletsCount > 0:
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            if self.bulletsCount > 0:
+                if self.hero.KD <= 0:
                     self.hero.set_dir(self.crosshair)
                     self.bullet_list.append(Bullet(self.crosshair.x + 60,
                                                     self.hero.y + 25,
                                                     self.hero.dx,
                                                     self.hero.dy))
                     self.bulletsCount -= len(self.bullet_list)
+                    self.hero.KD += 45
         if button == arcade.MOUSE_BUTTON_RIGHT:
             if self.reloadBuleetsCount > 0:
                 self.reloadBuleetsCount -= 30 - self.bulletsCount
