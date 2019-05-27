@@ -9,7 +9,6 @@ SCREEN_HEIGHT = 600
 
 background = arcade.load_texture("img/364.jpg")
 heroTexture = arcade.load_texture("img/pushka2.png")
-gunTexture1 = arcade.load_texture("img/puska3.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 enemiesTexture = arcade.load_texture("img/ter.png")
 bulletTexture = arcade.load_texture("img/bullet.png")
@@ -85,10 +84,10 @@ class Hero():
         self.dx = sin(self.dir * pi / 180)
         self.dy = cos(self.dir * pi / 180)
         self.color = color
-        self.gun = heroTexture
+
 
     def draw(self):
-        arcade.draw_texture_rectangle(self.x, self.y, 450, 220, self.gun)
+        arcade.draw_texture_rectangle(self.x, self.y, 450, 220, heroTexture)
 
     def turn_left(self):
         self.x -= 20
@@ -160,9 +159,7 @@ class MyGame(arcade.Window):
         return text
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.E:
-            self.gun = gunTexture1
-
+       pass
 
 
     def on_mouse_motion(self, x, y, dx, dy):
