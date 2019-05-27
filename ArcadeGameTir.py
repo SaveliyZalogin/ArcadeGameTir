@@ -12,10 +12,17 @@ heroTexture = arcade.load_texture("img/pushka2.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 enemiesTexture = arcade.load_texture("img/ter.png")
 bulletTexture = arcade.load_texture("img/bullet.png")
-
+background2 = arcade.load_texture("img/desert.jpg")
 
 def get_distance(hero1, hero2):
     return ((hero1.x - hero2.x) ** 2 + (hero1.y - hero2.y) ** 2) ** 0.5
+
+class Level():
+    def __init__(self):
+        self.killcount = 0
+
+    def change(self):
+        arcade.draw_texture_rectangle(450, 300, 900, 600, background2)
 
 
 class Enemies():
@@ -71,8 +78,8 @@ class Bullet():
         out_y = not 0 < self.y < SCREEN_HEIGHT
         return out_x or out_y or self.distance_live <= 0
 
-    def is_hit(self, hero):
-        return get_distance(self, hero) <= hero.x
+    def is_hit(self, bullet):
+        return get_distance(self, bullet) <= bullet.x and get_distance(self, bullet) <= bullet.y
 
 
 class Hero():
@@ -85,7 +92,7 @@ class Hero():
         self.dy = cos(self.dir * pi / 180)
         self.color = color
         self.KD = 45
-
+        self.killcount = 0
 
     def draw(self):
         arcade.draw_texture_rectangle(self.x, self.y, 450, 220, heroTexture)
@@ -120,12 +127,12 @@ class MyGame(arcade.Window):
         self.wait = time.clock()
         self.bulletsCount = 30
         self.reloadBuleetsCount = 90
-        self.killcount = 0
+        self.level = Level()
+
 
     def on_draw(self):
         arcade.start_render()
         arcade.draw_texture_rectangle(450, 300, 900, 600, background)
-
         for enemy in self.enemi_list:
             enemy.draw()
         self.hero.draw()
@@ -136,23 +143,24 @@ class MyGame(arcade.Window):
             bullet.draw()
 
     def update(self, delta_time):
+        if self.level.killcount == 3:
+            self.level.change()
         if random.randint(0, 1200) < 10:
             self.enemi_list.append(Enemies())
         self.hero.KD -= 1
         for bullet in self.bullet_list:
             bullet.move()
-
             if bullet.is_removeble():
                 self.bullet_list.remove(bullet)
             for enemy in self.enemi_list:
                 if bullet.is_hit(enemy):
                     self.bullet_list.remove(bullet)
                     self.enemi_list.remove(enemy)
-                    self.killcount += 1
-
+                    self.hero.killcount += 1
+                    self.level.killcount += 1
 
     def kill_count(self):
-        killtext = "{}\n".format(self.killcount)
+        killtext = "{}\n".format(self.hero.killcount)
         return killtext
 
     def get_bullets(self):
