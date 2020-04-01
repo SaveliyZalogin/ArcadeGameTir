@@ -12,42 +12,32 @@ heroTexture = arcade.load_texture("img/pushka2.png")
 crossHairTexture = arcade.load_texture("img/cross.png")
 enemiesTexture = arcade.load_texture("img/ter.png")
 bulletTexture = arcade.load_texture("img/bullet.png")
-background2 = arcade.load_texture("img/desert.jpg")
+
 
 def get_distance(hero1, hero2):
     return ((hero1.x - hero2.x) ** 2 + (hero1.y - hero2.y) ** 2) ** 0.5
 
-class Level():
-    def __init__(self):
-        self.killcount = 0
 
-    def change(self):
-        arcade.draw_texture_rectangle(450, 300, 900, 600, background2)
+class Enemies(arcade.Sprite):
+    def __init__(self, texture):
+        super().__init__()
 
-
-class Enemies():
-    def __init__(self):
+    def position(self):
         list_position = [(200, 155), (70, 463), (560, 230)]
-        self.x, self.y = random.choice(list_position)
+        self.center_x, self.center_y = random.choice(list_position)
+        return self.center_x, self.center_y
+
+    # def draw(self):
+    #     arcade.draw_texture_rectangle(self.x, self.y, 70, 30, enemiesTexture)
 
 
-    def draw(self):
-        if self.x == 200:
-            arcade.draw_texture_rectangle(self.x, self.y, 70, 130, enemiesTexture)
-        if self.x == 70:
-            arcade.draw_texture_rectangle(self.x, self.y, 50, 110, enemiesTexture)
-        if self.x == 560:
-            arcade.draw_texture_rectangle(self.x, self.y, 60, 120, enemiesTexture)
-
-
-class Crosshair():
-    def __init__(self):
+class Crosshair(arcade.Sprite):
+    def __init__(self, texture):
+        super().__init__()
         self.x = 420
         self.y = 300
         self.r = 5
 
-    def draw(self, color=arcade.color.WHITE):
-        arcade.draw_texture_rectangle(self.x, self.y, 50, 50, crossHairTexture)
         #arcade.draw_circle_filled(self.x, self.y, self.r, color)
 
     # def move(self, x, y):
@@ -55,8 +45,9 @@ class Crosshair():
     #  self.y += y
 
 
-class Bullet():
-    def __init__(self, x, y, dx, dy):
+class Bullet(arcade.Sprite):
+    def __init__(self, texture, x, y, dx, dy):
+        super().__init__()
         self.x = x
         self.y = y
         self.speed = 12
@@ -73,17 +64,18 @@ class Bullet():
         self.y += self.dy * self.speed
         self.distance_live -= 1
 
-    def is_removeble(self):
-        out_x = not 0 < self.x < SCREEN_WIDTH
-        out_y = not 0 < self.y < SCREEN_HEIGHT
-        return out_x or out_y or self.distance_live <= 0
+    # def is_removeble(self):
+    #     out_x = not 0 < self.x < SCREEN_WIDTH
+    #     out_y = not 0 < self.y < SCREEN_HEIGHT
+    #     return out_x or out_y or self.distance_live <= 0
 
-    def is_hit(self, bullet):
-        return get_distance(self, bullet) <= bullet.x and get_distance(self, bullet) <= bullet.y
+    # def is_hit(self, bullet):
+    #     return get_distance(self, bullet) <= bullet.x and get_distance(self, bullet) <= bullet.y
 
 
-class Hero():
+class Hero(arcade.Sprite):
     def __init__(self, color=arcade.color.RED, size=30):
+        super().__init__()
         self.x = 470
         self.y = 110
         self.dir = 0
@@ -97,18 +89,18 @@ class Hero():
     def draw(self):
         arcade.draw_texture_rectangle(self.x, self.y, 450, 220, heroTexture)
 
-    def turn_left(self):
-        self.x -= 20
-
-    def turn_right(self):
-        self.x += 20
-
-    def set_dir(self, cross):
-        dx = cross.x - self.x
-        dy = cross.y - self.y
-        r = (dx ** 2 + dy ** 2) ** 0.5
-        self.dx = dx / r
-        self.dy = dy / r
+    # def turn_left(self):
+    #     self.x -= 20
+    #
+    # def turn_right(self):
+    #     self.x += 20
+    #
+    # def set_dir(self, cross):
+    #     dx = cross.x - self.x
+    #     dy = cross.y - self.y
+    #     r = (dx ** 2 + dy ** 2) ** 0.5
+    #     self.dx = dx / r
+    #     self.dy = dy / r
 
 
 class MyGame(arcade.Window):
@@ -116,48 +108,74 @@ class MyGame(arcade.Window):
         super().__init__(widht, height)
         self.set_mouse_visible(False)
         arcade.set_background_color(arcade.color.BLACK)
-
-    def setup(self):
-        self.hero = Hero()
-        self.bullet_list = []
-        self.crosshair = Crosshair()
-        self.bullet_list = []
-        self.enemi_list = []
-        self.hp_list = []
+        self.mouse_left_clicked = False
+        self.hero_sprite = None
+        self.bullet_list = None
+        self.crosshair_list = None
+        self.enemi_list = None
         self.wait = time.clock()
         self.bulletsCount = 30
         self.reloadBuleetsCount = 90
-        self.level = Level()
 
+    def setup(self):
+        self.hero_sprite = arcade.SpriteList()
+        self.hero = Hero(heroTexture)
+        self.hero.center_x = 470
+        self.hero.center_y = 110
+        self.hero.width = 450
+        self.hero.height = 220
+        self.hero_sprite.append(self.hero)
+
+        self.bullet_list = arcade.SpriteList()
+
+        self.crosshair_list = arcade.SpriteList()
+        self.crosshair = Crosshair(crossHairTexture)
+        self.crosshair.center_x = SCREEN_WIDTH // 2
+        self.crosshair.center_y = SCREEN_HEIGHT // 2
+        self.crosshair.width = 50
+        self.crosshair.height = 50
+        self.crosshair_list.append(self.crosshair)
+
+        self.enemi_list = arcade.SpriteList()
+        self.enemy = Enemies(enemiesTexture)
+        self.enemy.center_x = self.enemy.position()
+        self.enemy.center_y = self.enemy.position()
+        self.enemy.width = 35
+        self.enemy.height = 80
 
     def on_draw(self):
         arcade.start_render()
         arcade.draw_texture_rectangle(450, 300, 900, 600, background)
-        for enemy in self.enemi_list:
-            enemy.draw()
-        self.hero.draw()
-        self.crosshair.draw()
-        arcade.draw_text(self.kill_count(), 150, 100, arcade.color.WHITE)
-        arcade.draw_text(self.get_bullets(), 100, 100, arcade.color.WHITE)
-        for bullet in self.bullet_list:
-            bullet.draw()
+        self.hero_sprite.draw()
+        self.bullet_list.draw()
+        # for enemy in self.enemi_list:
+        #     enemy.draw()
+        # self.hero.draw()
+        # self.crosshair.draw()
+        # arcade.draw_text(self.kill_count(), 150, 100, arcade.color.WHITE)
+        # arcade.draw_text(self.get_bullets(), 100, 100, arcade.color.WHITE)
+        # for bullet in self.bullet_list:
+        #     bullet.draw()
 
     def update(self, delta_time):
-        if self.level.killcount == 3:
-            self.level.change()
         if random.randint(0, 1200) < 10:
-            self.enemi_list.append(Enemies())
-        self.hero.KD -= 1
+            self.enemi_list.append(self.enemy)
+
         for bullet in self.bullet_list:
             bullet.move()
-            if bullet.is_removeble():
-                self.bullet_list.remove(bullet)
-            for enemy in self.enemi_list:
-                if bullet.is_hit(enemy):
-                    self.bullet_list.remove(bullet)
-                    self.enemi_list.remove(enemy)
-                    self.hero.killcount += 1
-                    self.level.killcount += 1
+
+        hit_list = arcade.check_for_collision_with_list(self.enemy, self.bullet_list)
+        for enemy in hit_list:
+            enemy.remove_from_sprite_lists()
+        for bullet in hit_list:
+            bullet.remove_from_sprite_lists()
+            # if bullet.is_removeble():
+            #     self.bullet_list.remove(bullet)
+            # for enemy in self.enemi_list:
+            #     if bullet.is_hit(enemy):
+            #         self.bullet_list.remove(bullet)
+            #         self.enemi_list.remove(enemy)
+            #         self.hero.killcount += 1
 
     def kill_count(self):
         killtext = "{}\n".format(self.hero.killcount)
@@ -171,7 +189,6 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
        pass
 
-
     def on_mouse_motion(self, x, y, dx, dy):
         self.crosshair.x = x
         self.crosshair.y = y
@@ -181,11 +198,10 @@ class MyGame(arcade.Window):
 
     def on_mouse_press(self, x: float, y: float, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
+            self.mouse_left_clicked = True
             if self.bulletsCount > 0:
-                if self.hero.KD <= 0:
-                    self.hero.set_dir(self.crosshair)
-                    self.bullet_list.append(Bullet(self.crosshair.x + 60,
-                                                    self.hero.y + 25,
+                    self.bullet_list.append(Bullet(bulletTexture, self.crosshair.center_x + 60,
+                                                    self.hero.center_y + 25,
                                                     self.hero.dx,
                                                     self.hero.dy))
                     self.bulletsCount -= len(self.bullet_list)
@@ -194,6 +210,10 @@ class MyGame(arcade.Window):
             if self.reloadBuleetsCount > 0:
                 self.reloadBuleetsCount -= 30 - self.bulletsCount
                 self.bulletsCount = 30
+
+    def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.mouse_left_clicked = False
 
 def main():
     game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT)
